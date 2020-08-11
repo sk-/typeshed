@@ -1,79 +1,79 @@
-from typing import Any
+from typing_extensions import Literal
 
-NO = ...  # type: Any
-YES = ...  # type: Any
-TRUE = ...  # type: Any
-FALSE = ...  # type: Any
-ON = ...  # type: Any
-OFF = ...  # type: Any
-N = ...  # type: Any
-S = ...  # type: Any
-W = ...  # type: Any
-E = ...  # type: Any
-NW = ...  # type: Any
-SW = ...  # type: Any
-NE = ...  # type: Any
-SE = ...  # type: Any
-NS = ...  # type: Any
-EW = ...  # type: Any
-NSEW = ...  # type: Any
-CENTER = ...  # type: Any
-NONE = ...  # type: Any
-X = ...  # type: Any
-Y = ...  # type: Any
-BOTH = ...  # type: Any
-LEFT = ...  # type: Any
-TOP = ...  # type: Any
-RIGHT = ...  # type: Any
-BOTTOM = ...  # type: Any
-RAISED = ...  # type: Any
-SUNKEN = ...  # type: Any
-FLAT = ...  # type: Any
-RIDGE = ...  # type: Any
-GROOVE = ...  # type: Any
-SOLID = ...  # type: Any
-HORIZONTAL = ...  # type: Any
-VERTICAL = ...  # type: Any
-NUMERIC = ...  # type: Any
-CHAR = ...  # type: Any
-WORD = ...  # type: Any
-BASELINE = ...  # type: Any
-INSIDE = ...  # type: Any
-OUTSIDE = ...  # type: Any
-SEL = ...  # type: Any
-SEL_FIRST = ...  # type: Any
-SEL_LAST = ...  # type: Any
-END = ...  # type: Any
-INSERT = ...  # type: Any
-CURRENT = ...  # type: Any
-ANCHOR = ...  # type: Any
-ALL = ...  # type: Any
-NORMAL = ...  # type: Any
-DISABLED = ...  # type: Any
-ACTIVE = ...  # type: Any
-HIDDEN = ...  # type: Any
-CASCADE = ...  # type: Any
-CHECKBUTTON = ...  # type: Any
-COMMAND = ...  # type: Any
-RADIOBUTTON = ...  # type: Any
-SEPARATOR = ...  # type: Any
-SINGLE = ...  # type: Any
-BROWSE = ...  # type: Any
-MULTIPLE = ...  # type: Any
-EXTENDED = ...  # type: Any
-DOTBOX = ...  # type: Any
-UNDERLINE = ...  # type: Any
-PIESLICE = ...  # type: Any
-CHORD = ...  # type: Any
-ARC = ...  # type: Any
-FIRST = ...  # type: Any
-LAST = ...  # type: Any
-BUTT = ...  # type: Any
-PROJECTING = ...  # type: Any
-ROUND = ...  # type: Any
-BEVEL = ...  # type: Any
-MITER = ...  # type: Any
-MOVETO = ...  # type: Any
-SCROLL = ...  # type: Any
-UNITS = ...  # type: Any
-PAGES = ...  # type: Any
+NO: Literal[0]
+YES: Literal[1]
+TRUE: Literal[1]
+FALSE: Literal[0]
+ON: Literal[1]
+OFF: Literal[0]
+N: Literal["n"]
+S: Literal["s"]
+W: Literal["w"]
+E: Literal["e"]
+NW: Literal["nw"]
+SW: Literal["sw"]
+NE: Literal["ne"]
+SE: Literal["se"]
+NS: Literal["ns"]
+EW: Literal["ew"]
+NSEW: Literal["nsew"]
+CENTER: Literal["center"]
+NONE: Literal["none"]
+X: Literal["x"]
+Y: Literal["y"]
+BOTH: Literal["both"]
+LEFT: Literal["left"]
+TOP: Literal["top"]
+RIGHT: Literal["right"]
+BOTTOM: Literal["bottom"]
+RAISED: Literal["raised"]
+SUNKEN: Literal["sunken"]
+FLAT: Literal["flat"]
+RIDGE: Literal["ridge"]
+GROOVE: Literal["groove"]
+SOLID: Literal["solid"]
+HORIZONTAL: Literal["horizontal"]
+VERTICAL: Literal["vertical"]
+NUMERIC: Literal["numeric"]
+CHAR: Literal["char"]
+WORD: Literal["word"]
+BASELINE: Literal["baseline"]
+INSIDE: Literal["inside"]
+OUTSIDE: Literal["outside"]
+SEL: Literal["sel"]
+SEL_FIRST: Literal["sel.first"]
+SEL_LAST: Literal["sel.last"]
+END: Literal["end"]
+INSERT: Literal["insert"]
+CURRENT: Literal["current"]
+ANCHOR: Literal["anchor"]
+ALL: Literal["all"]
+NORMAL: Literal["normal"]
+DISABLED: Literal["disabled"]
+ACTIVE: Literal["active"]
+HIDDEN: Literal["hidden"]
+CASCADE: Literal["cascade"]
+CHECKBUTTON: Literal["checkbutton"]
+COMMAND: Literal["command"]
+RADIOBUTTON: Literal["radiobutton"]
+SEPARATOR: Literal["separator"]
+SINGLE: Literal["single"]
+BROWSE: Literal["browse"]
+MULTIPLE: Literal["multiple"]
+EXTENDED: Literal["extended"]
+DOTBOX: Literal["dotbox"]
+UNDERLINE: Literal["underline"]
+PIESLICE: Literal["pieslice"]
+CHORD: Literal["chord"]
+ARC: Literal["arc"]
+FIRST: Literal["first"]
+LAST: Literal["last"]
+BUTT: Literal["butt"]
+PROJECTING: Literal["projecting"]
+ROUND: Literal["round"]
+BEVEL: Literal["bevel"]
+MITER: Literal["miter"]
+MOVETO: Literal["moveto"]
+SCROLL: Literal["scroll"]
+UNITS: Literal["units"]
+PAGES: Literal["pages"]

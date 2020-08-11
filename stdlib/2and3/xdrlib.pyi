@@ -1,10 +1,10 @@
 # Structs for xdrlib (Python 2 and 3)
 from typing import Callable, List, Sequence, TypeVar
 
-_T = TypeVar('_T')
+_T = TypeVar("_T")
 
 class Error(Exception):
-    msg = ...  # type: str
+    msg: str
     def __init__(self, msg: str) -> None: ...
 
 class ConversionError(Error): ...

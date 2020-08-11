@@ -1,17 +1,7 @@
-from google.protobuf.message import (
-    Message,
-)
-from typing import (
-    Optional,
-)
+from typing import Optional
 
+from google.protobuf.message import Message
 
 class PublicImportMessage(Message):
-    e = ...  # type: int
-
-    def __init__(self,
-                 e: Optional[int] = ...,
-                 ) -> None: ...
-
-    @classmethod
-    def FromString(cls, s: bytes) -> PublicImportMessage: ...
+    e: int
+    def __init__(self, e: Optional[int] = ...) -> None: ...

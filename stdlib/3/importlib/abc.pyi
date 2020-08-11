@@ -1,25 +1,16 @@
-from abc import ABCMeta, abstractmethod
 import os
 import sys
 import types
-from typing import Any, IO, Iterator, Mapping, Optional, Sequence, Tuple, Union
+from abc import ABCMeta, abstractmethod
+from typing import IO, Any, Iterator, Mapping, Optional, Sequence, Tuple, Union
 
 # Loader is exported from this module, but for circular import reasons
 # exists in its own stub file (with ModuleSpec and ModuleType).
-from _importlib_modulespec import Loader as Loader  # Exported
-
-from _importlib_modulespec import ModuleSpec
+from _importlib_modulespec import Loader as Loader, ModuleSpec  # Exported
 
 _Path = Union[bytes, str]
 
-class Finder(metaclass=ABCMeta):
-    ...
-    # Technically this class defines the following method, but its subclasses
-    # in this module violate its signature. Since this class is deprecated, it's
-    # easier to simply ignore that this method exists.
-    # @abstractmethod
-    # def find_module(self, fullname: str,
-    #                 path: Optional[Sequence[_Path]] = ...) -> Optional[Loader]: ...
+class Finder(metaclass=ABCMeta): ...
 
 class ResourceLoader(Loader):
     @abstractmethod
@@ -32,13 +23,8 @@ class InspectLoader(Loader):
     @abstractmethod
     def get_source(self, fullname: str) -> Optional[str]: ...
     def exec_module(self, module: types.ModuleType) -> None: ...
-    if sys.version_info < (3, 5):
-        def source_to_code(self, data: Union[bytes, str],
-                           path: str = ...) -> types.CodeType: ...
-    else:
-        @staticmethod
-        def source_to_code(data: Union[bytes, str],
-                           path: str = ...) -> types.CodeType: ...
+    @staticmethod
+    def source_to_code(data: Union[bytes, str], path: str = ...) -> types.CodeType: ...
 
 class ExecutionLoader(InspectLoader):
     @abstractmethod
@@ -51,41 +37,30 @@ class SourceLoader(ResourceLoader, ExecutionLoader, metaclass=ABCMeta):
     def get_source(self, fullname: str) -> Optional[str]: ...
     def path_stats(self, path: _Path) -> Mapping[str, Any]: ...
 
-
 class MetaPathFinder(Finder):
-    def find_module(self, fullname: str,
-                    path: Optional[Sequence[_Path]]) -> Optional[Loader]:
-        ...
+    def find_module(self, fullname: str, path: Optional[Sequence[_Path]]) -> Optional[Loader]: ...
     def invalidate_caches(self) -> None: ...
     # Not defined on the actual class, but expected to exist.
     def find_spec(
-        self, fullname: str, path: Optional[Sequence[_Path]],
-        target: Optional[types.ModuleType] = ...
-    ) -> Optional[ModuleSpec]:
-        ...
+        self, fullname: str, path: Optional[Sequence[_Path]], target: Optional[types.ModuleType] = ...
+    ) -> Optional[ModuleSpec]: ...
 
 class PathEntryFinder(Finder):
     def find_module(self, fullname: str) -> Optional[Loader]: ...
-    def find_loader(
-        self, fullname: str
-    ) -> Tuple[Optional[Loader], Sequence[_Path]]: ...
+    def find_loader(self, fullname: str) -> Tuple[Optional[Loader], Sequence[_Path]]: ...
     def invalidate_caches(self) -> None: ...
     # Not defined on the actual class, but expected to exist.
-    def find_spec(
-        self, fullname: str,
-        target: Optional[types.ModuleType] = ...
-    ) -> Optional[ModuleSpec]: ...
+    def find_spec(self, fullname: str, target: Optional[types.ModuleType] = ...) -> Optional[ModuleSpec]: ...
 
 class FileLoader(ResourceLoader, ExecutionLoader, metaclass=ABCMeta):
-    name = ...  # type: str
-    path = ...  # type: _Path
+    name: str
+    path: _Path
     def __init__(self, fullname: str, path: _Path) -> None: ...
     def get_data(self, path: _Path) -> bytes: ...
     def get_filename(self, fullname: str) -> _Path: ...
 
 if sys.version_info >= (3, 7):
     _PathLike = Union[bytes, str, os.PathLike[Any]]
-
     class ResourceReader(metaclass=ABCMeta):
         @abstractmethod
         def open_resource(self, resource: _PathLike) -> IO[bytes]: ...

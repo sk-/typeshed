@@ -1,42 +1,43 @@
-from typing import Any, Optional, List, Type
-
 import array
-import sys
 import threading
 import weakref
-
-from .connection import Pipe
-from threading import Lock, RLock, Semaphore, BoundedSemaphore
-from threading import Event, Condition, Barrier
-from queue import Queue
+from queue import Queue as Queue
+from typing import Any, List, Optional
 
 JoinableQueue = Queue
-
+Barrier = threading.Barrier
+BoundedSemaphore = threading.BoundedSemaphore
+Condition = threading.Condition
+Event = threading.Event
+Lock = threading.Lock
+RLock = threading.RLock
+Semaphore = threading.Semaphore
 
 class DummyProcess(threading.Thread):
-    _children = ...  # type: weakref.WeakKeyDictionary
-    _parent = ...  # type: threading.Thread
-    _pid = ...  # type: None
-    _start_called = ...  # type: int
-    exitcode = ...  # type: Optional[int]
+    _children: weakref.WeakKeyDictionary[Any, Any]
+    _parent: threading.Thread
+    _pid: None
+    _start_called: int
+    exitcode: Optional[int]
     def __init__(self, group=..., target=..., name=..., args=..., kwargs=...) -> None: ...
 
 Process = DummyProcess
 
-class Namespace(object):
-    def __init__(self, **kwds) -> None: ...
+class Namespace:
+    def __init__(self, **kwds: Any) -> None: ...
+    def __getattr__(self, __name: str) -> Any: ...
+    def __setattr__(self, __name: str, __value: Any) -> None: ...
 
-class Value(object):
-    _typecode = ...  # type: Any
-    _value = ...  # type: Any
-    value = ...  # type: Any
+class Value:
+    _typecode: Any
+    _value: Any
+    value: Any
     def __init__(self, typecode, value, lock=...) -> None: ...
 
-
-def Array(typecode, sequence, lock=...) -> array.array: ...
+def Array(typecode, sequence, lock=...) -> array.array[Any]: ...
 def Manager() -> Any: ...
 def Pool(processes=..., initializer=..., initargs=...) -> Any: ...
-def active_children() -> List: ...
+def active_children() -> List[Any]: ...
 def current_process() -> threading.Thread: ...
 def freeze_support() -> None: ...
 def shutdown() -> None: ...

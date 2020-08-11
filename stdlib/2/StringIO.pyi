@@ -1,12 +1,12 @@
 # Stubs for StringIO (Python 2)
 
-from typing import Any, IO, AnyStr, Iterator, Iterable, Generic, List, Optional
+from typing import IO, Any, AnyStr, Generic, Iterable, Iterator, List, Optional
 
 class StringIO(IO[AnyStr], Generic[AnyStr]):
-    closed = ...  # type: bool
-    softspace = ...  # type: int
-    len = ...  # type: int
-    name = ...  # type: str
+    closed: bool
+    softspace: int
+    len: int
+    name: str
     def __init__(self, buf: AnyStr = ...) -> None: ...
     def __iter__(self) -> Iterator[AnyStr]: ...
     def next(self) -> AnyStr: ...
