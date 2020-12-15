@@ -91,9 +91,24 @@ def get_type_hints(
 
 if sys.version_info >= (3, 7):
     def get_args(tp: Any) -> Tuple[Any, ...]: ...
+    def get_origin(tp: Any) -> Optional[Any]: ...
 
 Annotated: _SpecialForm = ...
 _AnnotatedAlias: Any = ...  # undocumented
 
 # TypeAlias is a (non-subscriptable) special form.
 class TypeAlias: ...
+
+@runtime_checkable
+class SupportsIndex(Protocol, metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def __index__(self) -> int: ...
+
+# PEP 612 support for Python < 3.9
+if sys.version_info >= (3, 10):
+    from typing import Concatenate as Concatenate, ParamSpec as ParamSpec
+else:
+    class ParamSpec:
+        __name__: str
+        def __init__(self, name: str) -> None: ...
+    Concatenate: _SpecialForm = ...

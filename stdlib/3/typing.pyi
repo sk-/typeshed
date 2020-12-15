@@ -1,7 +1,13 @@
 import collections  # Needed by aliases like DefaultDict, see mypy issue 2986
 import sys
 from abc import ABCMeta, abstractmethod
-from types import CodeType, FrameType, TracebackType
+from types import BuiltinFunctionType, CodeType, FrameType, FunctionType, MethodType, ModuleType, TracebackType
+
+if sys.version_info >= (3, 7):
+    from types import MethodDescriptorType, MethodWrapperType, WrapperDescriptorType
+
+if sys.version_info >= (3, 9):
+    from types import GenericAlias
 
 # Definitions of special type checking related constructs.  Their definitions
 # are not used, so their value does not matter.
@@ -48,6 +54,13 @@ if sys.version_info >= (3, 8):
 
 if sys.version_info < (3, 7):
     class GenericMeta(type): ...
+
+if sys.version_info >= (3, 10):
+    class ParamSpec:
+        __name__: str
+        def __init__(self, name: str) -> None: ...
+    Concatenate: _SpecialForm = ...
+    TypeAlias: _SpecialForm = ...
 
 # Return type that indicates a function does not return.
 # This type is equivalent to the None type, but the no-op Union is necessary to
@@ -139,11 +152,6 @@ class SupportsRound(Protocol[_T_co]):
     def __round__(self, ndigits: int) -> _T_co: ...
 
 @runtime_checkable
-class Reversible(Protocol[_T_co]):
-    @abstractmethod
-    def __reversed__(self) -> Iterator[_T_co]: ...
-
-@runtime_checkable
 class Sized(Protocol, metaclass=ABCMeta):
     @abstractmethod
     def __len__(self) -> int: ...
@@ -166,6 +174,11 @@ class Iterator(Iterable[_T_co], Protocol[_T_co]):
     @abstractmethod
     def __next__(self) -> _T_co: ...
     def __iter__(self) -> Iterator[_T_co]: ...
+
+@runtime_checkable
+class Reversible(Iterable[_T_co], Protocol[_T_co]):
+    @abstractmethod
+    def __reversed__(self) -> Iterator[_T_co]: ...
 
 class Generator(Iterator[_T_co], Generic[_T_co, _T_contra, _V_co]):
     def __next__(self) -> _T_co: ...
@@ -236,51 +249,44 @@ class AsyncIterator(AsyncIterable[_T_co], Protocol[_T_co]):
     def __anext__(self) -> Awaitable[_T_co]: ...
     def __aiter__(self) -> AsyncIterator[_T_co]: ...
 
-if sys.version_info >= (3, 6):
-    class AsyncGenerator(AsyncIterator[_T_co], Generic[_T_co, _T_contra]):
-        @abstractmethod
-        def __anext__(self) -> Awaitable[_T_co]: ...
-        @abstractmethod
-        def asend(self, __value: _T_contra) -> Awaitable[_T_co]: ...
-        @overload
-        @abstractmethod
-        def athrow(
-            self, __typ: Type[BaseException], __val: Union[BaseException, object] = ..., __tb: Optional[TracebackType] = ...
-        ) -> Awaitable[_T_co]: ...
-        @overload
-        @abstractmethod
-        def athrow(self, __typ: BaseException, __val: None = ..., __tb: Optional[TracebackType] = ...) -> Awaitable[_T_co]: ...
-        @abstractmethod
-        def aclose(self) -> Awaitable[None]: ...
-        @abstractmethod
-        def __aiter__(self) -> AsyncGenerator[_T_co, _T_contra]: ...
-        @property
-        def ag_await(self) -> Any: ...
-        @property
-        def ag_code(self) -> CodeType: ...
-        @property
-        def ag_frame(self) -> FrameType: ...
-        @property
-        def ag_running(self) -> bool: ...
+class AsyncGenerator(AsyncIterator[_T_co], Generic[_T_co, _T_contra]):
+    @abstractmethod
+    def __anext__(self) -> Awaitable[_T_co]: ...
+    @abstractmethod
+    def asend(self, __value: _T_contra) -> Awaitable[_T_co]: ...
+    @overload
+    @abstractmethod
+    def athrow(
+        self, __typ: Type[BaseException], __val: Union[BaseException, object] = ..., __tb: Optional[TracebackType] = ...
+    ) -> Awaitable[_T_co]: ...
+    @overload
+    @abstractmethod
+    def athrow(self, __typ: BaseException, __val: None = ..., __tb: Optional[TracebackType] = ...) -> Awaitable[_T_co]: ...
+    @abstractmethod
+    def aclose(self) -> Awaitable[None]: ...
+    @abstractmethod
+    def __aiter__(self) -> AsyncGenerator[_T_co, _T_contra]: ...
+    @property
+    def ag_await(self) -> Any: ...
+    @property
+    def ag_code(self) -> CodeType: ...
+    @property
+    def ag_frame(self) -> FrameType: ...
+    @property
+    def ag_running(self) -> bool: ...
 
 @runtime_checkable
 class Container(Protocol[_T_co]):
     @abstractmethod
     def __contains__(self, __x: object) -> bool: ...
 
-if sys.version_info >= (3, 6):
-    @runtime_checkable
-    class Collection(Iterable[_T_co], Container[_T_co], Protocol[_T_co]):
-        # Implement Sized (but don't have it as a base class).
-        @abstractmethod
-        def __len__(self) -> int: ...
-    _Collection = Collection
-else:
-    @runtime_checkable
-    class _Collection(Iterable[_T_co], Container[_T_co], Protocol[_T_co]):
-        # Implement Sized (but don't have it as a base class).
-        @abstractmethod
-        def __len__(self) -> int: ...
+@runtime_checkable
+class Collection(Iterable[_T_co], Container[_T_co], Protocol[_T_co]):
+    # Implement Sized (but don't have it as a base class).
+    @abstractmethod
+    def __len__(self) -> int: ...
+
+_Collection = Collection[_T_co]
 
 class Sequence(_Collection[_T_co], Reversible[_T_co], Generic[_T_co]):
     @overload
@@ -409,7 +415,7 @@ class ContextManager(Protocol[_T_co]):
 class AsyncContextManager(Protocol[_T_co]):
     def __aenter__(self) -> Awaitable[_T_co]: ...
     def __aexit__(
-        self, exc_type: Optional[Type[BaseException]], exc_value: Optional[BaseException], traceback: Optional[TracebackType],
+        self, exc_type: Optional[Type[BaseException]], exc_value: Optional[BaseException], traceback: Optional[TracebackType]
     ) -> Awaitable[Optional[bool]]: ...
 
 class Mapping(_Collection[_KT], Generic[_KT, _VT_co]):
@@ -461,7 +467,6 @@ Text = str
 TYPE_CHECKING = True
 
 class IO(Iterator[AnyStr], Generic[AnyStr]):
-    # TODO detach
     # TODO use abstract properties
     @property
     def mode(self) -> str: ...
@@ -477,7 +482,6 @@ class IO(Iterator[AnyStr], Generic[AnyStr]):
     def flush(self) -> None: ...
     @abstractmethod
     def isatty(self) -> bool: ...
-    # TODO what if n is None?
     @abstractmethod
     def read(self, n: int = ...) -> AnyStr: ...
     @abstractmethod
@@ -496,7 +500,6 @@ class IO(Iterator[AnyStr], Generic[AnyStr]):
     def truncate(self, size: Optional[int] = ...) -> int: ...
     @abstractmethod
     def writable(self) -> bool: ...
-    # TODO buffer objects
     @abstractmethod
     def write(self, s: AnyStr) -> int: ...
     @abstractmethod
@@ -513,9 +516,6 @@ class IO(Iterator[AnyStr], Generic[AnyStr]):
     ) -> Optional[bool]: ...
 
 class BinaryIO(IO[bytes]):
-    # TODO readinto
-    # TODO read1?
-    # TODO peek?
     @abstractmethod
     def __enter__(self) -> BinaryIO: ...
 
@@ -551,7 +551,7 @@ class Match(Generic[AnyStr]):
     @overload
     def group(self, __group: Union[str, int] = ...) -> AnyStr: ...
     @overload
-    def group(self, __group1: Union[str, int], __group2: Union[str, int], *groups: Union[str, int],) -> Tuple[AnyStr, ...]: ...
+    def group(self, __group1: Union[str, int], __group2: Union[str, int], *groups: Union[str, int]) -> Tuple[AnyStr, ...]: ...
     def groups(self, default: AnyStr = ...) -> Sequence[AnyStr]: ...
     def groupdict(self, default: AnyStr = ...) -> dict[str, AnyStr]: ...
     def start(self, __group: Union[int, str] = ...) -> int: ...
@@ -559,8 +559,9 @@ class Match(Generic[AnyStr]):
     def span(self, __group: Union[int, str] = ...) -> Tuple[int, int]: ...
     @property
     def regs(self) -> Tuple[Tuple[int, int], ...]: ...  # undocumented
-    if sys.version_info >= (3, 6):
-        def __getitem__(self, g: Union[int, str]) -> AnyStr: ...
+    def __getitem__(self, g: Union[int, str]) -> AnyStr: ...
+    if sys.version_info >= (3, 9):
+        def __class_getitem__(cls, item: Any) -> GenericAlias: ...
 
 class Pattern(Generic[AnyStr]):
     flags: int
@@ -582,12 +583,36 @@ class Pattern(Generic[AnyStr]):
     def subn(self, repl: AnyStr, string: AnyStr, count: int = ...) -> Tuple[AnyStr, int]: ...
     @overload
     def subn(self, repl: Callable[[Match[AnyStr]], AnyStr], string: AnyStr, count: int = ...) -> Tuple[AnyStr, int]: ...
+    if sys.version_info >= (3, 9):
+        def __class_getitem__(cls, item: Any) -> GenericAlias: ...
 
 # Functions
 
+if sys.version_info >= (3, 7):
+    _get_type_hints_obj_allowed_types = Union[
+        object,
+        Callable[..., Any],
+        FunctionType,
+        BuiltinFunctionType,
+        MethodType,
+        ModuleType,
+        WrapperDescriptorType,
+        MethodWrapperType,
+        MethodDescriptorType,
+    ]
+else:
+    _get_type_hints_obj_allowed_types = Union[
+        object,
+        Callable[..., Any],
+        FunctionType,
+        BuiltinFunctionType,
+        MethodType,
+        ModuleType,
+    ]
+
 if sys.version_info >= (3, 9):
     def get_type_hints(
-        obj: Callable[..., Any],
+        obj: _get_type_hints_obj_allowed_types,
         globalns: Optional[Dict[str, Any]] = ...,
         localns: Optional[Dict[str, Any]] = ...,
         include_extras: bool = ...,
@@ -595,7 +620,9 @@ if sys.version_info >= (3, 9):
 
 else:
     def get_type_hints(
-        obj: Callable[..., Any], globalns: Optional[Dict[str, Any]] = ..., localns: Optional[Dict[str, Any]] = ...,
+        obj: _get_type_hints_obj_allowed_types,
+        globalns: Optional[Dict[str, Any]] = ...,
+        localns: Optional[Dict[str, Any]] = ...,
     ) -> Dict[str, Any]: ...
 
 if sys.version_info >= (3, 8):

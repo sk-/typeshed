@@ -28,7 +28,7 @@ identifier = str
 class AST:
     _attributes: typing.Tuple[str, ...]
     _fields: typing.Tuple[str, ...]
-    def __init__(self, *args, **kwargs) -> None: ...
+    def __init__(self, *args: Any, **kwargs: Any) -> None: ...
 
 class mod(AST): ...
 
@@ -239,7 +239,7 @@ class Num(expr):
     n: Union[int, float, complex]
 
 class Str(expr):
-    s: bytes
+    s: Union[str, bytes]
     kind: str
 
 class Attribute(expr):

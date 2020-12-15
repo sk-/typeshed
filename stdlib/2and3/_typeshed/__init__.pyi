@@ -15,9 +15,10 @@
 import array
 import mmap
 import sys
-from typing import AbstractSet, Container, Protocol, Text, Tuple, TypeVar, Union
-from typing_extensions import Literal
+from typing import AbstractSet, Any, Container, Iterable, Protocol, Text, Tuple, TypeVar, Union
+from typing_extensions import Literal, final
 
+_KT = TypeVar("_KT")
 _KT_co = TypeVar("_KT_co", covariant=True)
 _KT_contra = TypeVar("_KT_contra", contravariant=True)
 _VT = TypeVar("_VT")
@@ -25,10 +26,19 @@ _VT_co = TypeVar("_VT_co", covariant=True)
 _T_co = TypeVar("_T_co", covariant=True)
 _T_contra = TypeVar("_T_contra", contravariant=True)
 
+class SupportsLessThan(Protocol):
+    def __lt__(self, __other: Any) -> bool: ...
+
+SupportsLessThanT = TypeVar("SupportsLessThanT", bound=SupportsLessThan)  # noqa: Y001
+
 # Mapping-like protocols
 
 class SupportsItems(Protocol[_KT_co, _VT_co]):
     def items(self) -> AbstractSet[Tuple[_KT_co, _VT_co]]: ...
+
+class SupportsKeysAndGetItem(Protocol[_KT, _VT_co]):
+    def keys(self) -> Iterable[_KT]: ...
+    def __getitem__(self, __k: _KT) -> _VT_co: ...
 
 class SupportsGetItem(Container[_KT_contra], Protocol[_KT_contra, _VT_co]):
     def __getitem__(self, __k: _KT_contra) -> _VT_co: ...
@@ -131,12 +141,8 @@ OpenBinaryModeUpdating = Literal[
     "b+x",
     "+bx",
 ]
-OpenBinaryModeWriting = Literal[
-    "wb", "bw", "ab", "ba", "xb", "bx",
-]
-OpenBinaryModeReading = Literal[
-    "rb", "br", "rbU", "rUb", "Urb", "brU", "bUr", "Ubr",
-]
+OpenBinaryModeWriting = Literal["wb", "bw", "ab", "ba", "xb", "bx"]
+OpenBinaryModeReading = Literal["rb", "br", "rbU", "rUb", "Urb", "brU", "bUr", "Ubr"]
 OpenBinaryMode = Union[OpenBinaryModeUpdating, OpenBinaryModeReading, OpenBinaryModeWriting]
 
 class HasFileno(Protocol):
@@ -163,3 +169,11 @@ if sys.version_info >= (3,):
 else:
     ReadableBuffer = Union[bytes, bytearray, memoryview, array.array, mmap.mmap, buffer]
     WriteableBuffer = Union[bytearray, memoryview, array.array, mmap.mmap, buffer]
+
+if sys.version_info >= (3, 10):
+    from types import NoneType as NoneType
+else:
+    # Used by type checkers for checks involving None (does not exist at runtime)
+    @final
+    class NoneType:
+        def __bool__(self) -> Literal[False]: ...
